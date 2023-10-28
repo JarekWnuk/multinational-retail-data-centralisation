@@ -37,7 +37,7 @@ class DataExtractor:
         engine = create_engine(f"{RDS_DATABASE_TYPE}+{RDS_DBAPI}://{RDS_USER}:{RDS_PASSWORD}@{RDS_HOST}:{RDS_PORT}/{RDS_DATABASE}")
         return engine
     
-    def list_db_tables(self):
+    def list_db_tables(self) -> list:
         """
         Establishes an active connection to the database by using the engine returned from the init_db_engine method.
         The databse is inspected and names of tables returned with the use of the inspect() function and the following
@@ -47,9 +47,10 @@ class DataExtractor:
             table_names: a list of table names, which are present in the database
         """
         db_engine = self.init_db_engine()
-        db_engine.execution_options(isolation_level='AUTOCOMMIT').connect()
-        inspector = inspect(db_engine)
-        table_names = inspector.get_table_names()
+        with db_engine.execution_options(isolation_level='AUTOCOMMIT').connect() as conn:
+            inspector = inspect(db_engine)
+            table_names = inspector.get_table_names()
+        conn.close()
         return table_names
 
 new_data_extractor = DataExtractor()
