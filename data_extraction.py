@@ -1,5 +1,6 @@
 import yaml
 from sqlalchemy import create_engine
+from sqlalchemy import inspect
 
 class DataExtractor:
     def __init__(self) -> None:
@@ -34,8 +35,22 @@ class DataExtractor:
         RDS_DATABASE = db_creds.get("RDS_DATABASE")
         RDS_PORT = db_creds.get("RDS_PORT")
         engine = create_engine(f"{RDS_DATABASE_TYPE}+{RDS_DBAPI}://{RDS_USER}:{RDS_PASSWORD}@{RDS_HOST}:{RDS_PORT}/{RDS_DATABASE}")
-
         return engine
+    
+    def list_db_tables(self):
+        """
+        Establishes an active connection to the database by using the engine returned from the init_db_engine method.
+        The databse is inspected and names of tables returned with the use of the inspect() function and the following
+        get_table_names() method.
+
+        Returns
+            table_names: a list of table names, which are present in the database
+        """
+        db_engine = self.init_db_engine()
+        db_engine.execution_options(isolation_level='AUTOCOMMIT').connect()
+        inspector = inspect(db_engine)
+        table_names = inspector.get_table_names()
+        return table_names
 
 new_data_extractor = DataExtractor()
-db_credentials_dict = new_data_extractor.read_db_creds()
+print(new_data_extractor.list_db_tables())
