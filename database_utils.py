@@ -1,18 +1,20 @@
-import yaml
+import yaml, pandas as pd
 from sqlalchemy import create_engine, inspect
 
 class DatabaseConnector:
     def __init__(self) -> None:
         pass
 
-    def read_db_creds(self) -> dict:
+    def read_db_creds(self, creds_file: str) -> dict:
         """
         Reads database credentials from db_creds_yaml and parses to a dictionary.
 
+        Args:
+            creds_file (str): path for file containing database credentials
         Returns:
             db_creds_dict: a dictionary containing database credentials
         """
-        with open("db_creds.yaml", "r") as yf:
+        with open(creds_file, "r") as yf:
             db_creds_dict = yaml.safe_load(yf)
             yf.close()
         return db_creds_dict
@@ -25,7 +27,7 @@ class DatabaseConnector:
         Returns:
             engine: an sqlalchemy database engine
         """
-        db_creds = self.read_db_creds()
+        db_creds = self.read_db_creds('db_creds.yaml')
         RDS_DATABASE_TYPE = 'postgresql'
         RDS_DBAPI = 'psycopg2'
         RDS_HOST = db_creds.get("RDS_HOST")
@@ -51,3 +53,6 @@ class DatabaseConnector:
             table_names = inspector.get_table_names()
         conn.close()
         return table_names
+    
+    def upload_to_db(df: pd.DataFrame, table_name: str):
+        pass
