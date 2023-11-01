@@ -1,6 +1,9 @@
 import pandas as pd
+import numpy as np
 from sqlalchemy import text
 from database_utils import DatabaseConnector
+from data_cleaning import DataCleaning
+from dateutil.parser import parse
 
 class DataExtractor:
     def __init__(self) -> None:
@@ -42,8 +45,12 @@ class DataExtractor:
 
 new_database_conn = DatabaseConnector()
 new_data_extractor = DataExtractor()
-#print(new_database_conn.list_db_tables())
-table_data_df = new_data_extractor.read_rds_table(new_database_conn, 'legacy_store_details')
-print(table_data_df.head())
+data_cleaning = DataCleaning()
+user_data_df = new_data_extractor.read_rds_table(new_database_conn, 'legacy_users')
+user_data_df_clean = data_cleaning.clean_user_data(user_data_df)
+print(user_data_df_clean.dtypes)
+
+
+
 
 
