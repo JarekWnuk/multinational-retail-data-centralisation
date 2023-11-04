@@ -19,15 +19,19 @@ class DatabaseConnector:
             yf.close()
         return db_creds_dict
     
-    def init_db_engine(self):
+    def init_db_engine(self, db_creds_file:str =None):
         """
         Get database credentials using the read_db_creds() method and intializes
-        a sqlalchemy database engine.
+        a sqlalchemy database engine. Takes in an optional argument with a path to a file containing database credentials.
+        If the argument is not passed the credentials are taken from the db_creds file as default.
 
         Returns:
             engine: an sqlalchemy database engine
         """
-        db_creds = self.read_db_creds('db_creds.yaml')
+        if db_creds_file:
+            db_creds = self.read_db_creds(db_creds_file)
+        else:
+            db_creds = self.read_db_creds('db_creds.yaml')
         RDS_DATABASE_TYPE = 'postgresql'
         RDS_DBAPI = 'psycopg2'
         RDS_HOST = db_creds.get("RDS_HOST")
