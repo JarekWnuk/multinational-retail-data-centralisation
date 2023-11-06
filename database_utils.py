@@ -58,5 +58,15 @@ class DatabaseConnector:
         conn.close()
         return table_names
     
-    def upload_to_db(df: pd.DataFrame, table_name: str):
-        pass
+    def upload_to_db(self, df: pd.DataFrame, table_name: str) -> None:
+        """
+        Takes in a pandas dataframe and uploads the data to a local database. The new table name is passed in the table_name
+        argument.
+
+        Args:
+            df (pd.DataFrame): a dataframe to be processed into an SQL table
+            table_name (str): the name of the new table to be created
+        """
+        engine = self.init_db_engine('db_creds_local.yaml')
+        df.to_sql(table_name, engine, if_exists='replace')
+        print(f'Table {table_name} has been created.')

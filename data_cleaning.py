@@ -23,7 +23,7 @@ class DataCleaning:
         df.replace(to_replace='^[A-Z0-9]{10}',regex=True, value=np.nan, inplace=True) 
 
         # converts dates of birth to datetime objects
-        df['date_of_birth'] = pd.to_datetime(df['date_of_birth'], format='mixed', errors='coerce') 
+        df['date_of_birth'] = pd.to_datetime(df['date_of_birth'], format='mixed', errors='coerce').dt.date
 
         # converts email addresses to string type raising any errors
         df['email_address'] = df['email_address'].astype('string', errors='raise')
@@ -35,7 +35,7 @@ class DataCleaning:
         df.loc[~df['email_address'].str.contains('@'), 'email_address'] = np.nan
 
         # converts join dates to datetime objects
-        df['join_date'] = pd.to_datetime(df['join_date'], format='mixed', errors='coerce')
+        df['join_date'] = pd.to_datetime(df['join_date'], format='mixed', errors='coerce').dt.date
 
         # replaces 'GGB' with 'GB' in 6 country code entries
         df['country_code'] = df['country_code'].str.replace('GGB','GB')
@@ -49,6 +49,9 @@ class DataCleaning:
 
         # parses country_code column as category
         df['country_code'] = df['country_code'].astype('category', errors='raise') 
+
+        # removes all null values from the database
+        df.dropna(inplace=True)
 
         return df
 

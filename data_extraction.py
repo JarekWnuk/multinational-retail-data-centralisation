@@ -64,8 +64,8 @@ new_data_extractor = DataExtractor()
 data_cleaning = DataCleaning()
 user_data_df = new_data_extractor.read_rds_table(new_database_conn, 'legacy_users')
 user_data_df_clean = data_cleaning.clean_user_data(user_data_df)
-df_from_pdf = new_data_extractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
-print(df_from_pdf.head(70))
+#df_from_pdf = new_data_extractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
+new_database_conn.upload_to_db(user_data_df_clean, 'dim_card_details')
 
 
 
