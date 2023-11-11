@@ -1,5 +1,5 @@
 RDS_HOST: localhost
-RDS_PASSWORD: M1otelka
+RDS_PASSWORD: m1otelka
 RDS_USER: postgres
 RDS_DATABASE: postgres
 RDS_PORT: 5432

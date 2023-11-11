@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from pandas.tseries.offsets import MonthEnd
+
 
 class DataCleaning:
     def __init__(self) -> None:
@@ -14,7 +16,7 @@ class DataCleaning:
             df: pandas dataframe
         
         Returns:
-            df: pandas dataframe with clean data
+            df: pandas dataframe with clean user data
         """
         # replaces all string entries equal to 'NULL' with nan
         df.replace(to_replace='NULL', value=np.nan, inplace=True) 
@@ -51,8 +53,37 @@ class DataCleaning:
         df['country_code'] = df['country_code'].astype('category', errors='raise') 
 
         # removes all null values from the database
-        df.dropna(inplace=True)
+        df = df.dropna()
 
         return df
-
     
+    def clean_card_data(self, df:pd.DataFrame) -> pd.DataFrame:   
+        """
+        Takes in a pandas dataframe containg card details from the project database and cleans it.
+        Operations involve removing incorrect entries, parsing data types, correcting some entries containing invalid characters.
+        
+        Args:
+            df: pandas dataframe
+        
+        Returns:
+            df: pandas dataframe with clean card details data
+        """
+        # replaces all string entries equal to 'NULL' with nan
+        df.replace(to_replace='NULL', value=np.nan, inplace=True)
+
+        # replaces all non numeric entries in the card_number column with nan
+        df['card_number'].replace(to_replace='^[a-zA-Z]',regex=True, value=np.nan, inplace=True)
+
+        # parses the expiry_date column to datetime infering last day for each month
+        df['expiry_date'] = pd.to_datetime(df['expiry_date'], format='%m/%y', errors='coerce') + MonthEnd(1)
+
+        # parses the date_payment_confirmed column to datetime
+        pd.to_datetime(df['date_payment_confirmed'], errors='coerce')
+
+        # perses the card_provider column to category
+        df['card_provider'].astype('category')
+
+        # removes all null values from the database
+        df = df.dropna()
+        
+        return df
