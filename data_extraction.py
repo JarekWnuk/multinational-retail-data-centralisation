@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import tabula
 import requests
+import os.path
 from sqlalchemy import text
 from database_utils import DatabaseConnector
 from data_cleaning import DataCleaning
@@ -74,6 +75,37 @@ class DataExtractor:
         response = requests.get(no_stores_endpoint, headers=header_dict)
         data = response.json()
         return data['number_stores']
+    
+    def retrieve_stores_data(self, stores_data_endpoint: str, no_of_stores: int,  header_dict: dict):
+        """
+        Retrieves data for all stores using an API. Converts each store data point to a dataframe and stores in a list.
+        The list of dataframes is concatenated to one dataframe and saved to a CSV file before it is returned. The process of
+        collecting all store data is time consuming and therefore it is more convenient to keep the data localy for further processing.       
+        If a file named 'df_stores.csv' already exists in the local directory it is loaded to a dataframe and returned.
+        
+        Args:
+            stores_data_endpoint (str): the endpoint URL for retrieving store data
+            no_of_stores (int): the total number of stores to extract
+            header_dict (dict): dictionary containing the authorization header with the x-api-key
+
+        Returns:
+            df (pd.Dataframe): a dataframe containing combined data for all stores
+        """
+        if os.path.isfile('df_stores.csv'):
+            with open('df_stores.csv', 'r') as f:
+                df_store_data = pd.read_csv(f)
+                f.close()
+        else:
+            df_list = []
+            for n in range(0, no_of_stores):
+                stores_data_endpoint_n = stores_data_endpoint +str(n)
+                response = requests.get(stores_data_endpoint_n, headers=header_dict)
+                data = response.json()
+                df = pd.DataFrame([data])
+                df_list.append(df)
+            df_store_data = pd.concat(df_list, ignore_index=True)
+            df_stores.to_csv('df_stores.csv', index=False)
+        return df_store_data
 
 new_database_conn = DatabaseConnector()
 new_data_extractor = DataExtractor()
@@ -88,6 +120,9 @@ data_cleaning = DataCleaning()
 # new_database_conn.upload_to_db(df_card_details_clean, 'dim_card_details')
 st_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores'
 header_dict ={"x-api-key":"yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
+st_data_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/'
 
-new_data_extractor.list_number_of_stores(st_endpoint, header_dict)
+no_of_stores = new_data_extractor.list_number_of_stores(st_endpoint, header_dict)
+df_stores = new_data_extractor.retrieve_stores_data(st_data_endpoint, no_of_stores, header_dict)
+print(df_stores.head())
 
