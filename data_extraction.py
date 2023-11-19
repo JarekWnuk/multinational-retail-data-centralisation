@@ -93,7 +93,7 @@ class DataExtractor:
         """
         if os.path.isfile('df_stores.csv'):
             with open('df_stores.csv', 'r') as f:
-                df_store_data = pd.read_csv(f)
+                df_store_data = pd.read_csv(f, index_col='index')
                 f.close()
         else:
             df_list = []
@@ -124,5 +124,4 @@ st_data_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/
 
 no_of_stores = new_data_extractor.list_number_of_stores(st_endpoint, header_dict)
 df_stores = new_data_extractor.retrieve_stores_data(st_data_endpoint, no_of_stores, header_dict)
-print(df_stores.head())
-
+df_stores_clean = data_cleaning.clean_store_data(df_stores)

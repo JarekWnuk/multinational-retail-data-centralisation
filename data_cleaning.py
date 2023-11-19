@@ -13,10 +13,10 @@ class DataCleaning:
         Operations involve removing incorrect entries, parsing data types, correcting some entries containing extra characters.
 
         Args:
-            df: pandas dataframe
+            df (pd.DataFrame): pandas dataframe with user data
         
         Returns:
-            df: pandas dataframe with clean user data
+            df (pd.DataFrame): pandas dataframe with clean user data
         """
         # replaces all string entries equal to 'NULL' with nan
         df.replace(to_replace='NULL', value=np.nan, inplace=True) 
@@ -63,10 +63,10 @@ class DataCleaning:
         Operations involve removing incorrect entries, parsing data types, correcting some entries containing invalid characters.
         
         Args:
-            df: pandas dataframe
+            df (pd.DataFrame): pandas dataframe with card details data
         
         Returns:
-            df: pandas dataframe with clean card details data
+            df (pd.DataFrame): pandas dataframe with clean card details data
         """
         # replaces all string entries equal to 'NULL' with nan
         df.replace(to_replace='NULL', value=np.nan, inplace=True)
@@ -85,5 +85,47 @@ class DataCleaning:
 
         # removes all null values from the database
         df = df.dropna()
+        
+        return df
+    
+    def clean_store_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Takes in a pandas dataframe containg store data from the project database and cleans it.
+        Operations involve removing incorrect entries, parsing data types, correcting some entries containing extra characters.
+
+        Args:
+            df (pd.DataFrame): pandas dataframe with store details data to clean
+        
+        Returns:
+            df (pd.DataFrame): pandas dataframe with clean store details data
+        """
+        # replaces newline characters from the address column with whitespaces
+        df['address'] = df['address'].str.replace('\n',' ')
+        
+        # removes the lat column since it contains minimal data
+        df = df.drop('lat', axis=1)
+        
+        # removes multiple rows which contained only incorrect data
+        df = df.drop([63, 172, 217, 231, 333, 381, 414, 447, 405, 437], axis=0)
+        
+        # corrects some entries in the staff numbers column, contained a mix of numbers and characters
+        df['staff_numbers'].loc[31] = '78'   # previously J78
+        df['staff_numbers'].loc[341] = '97'  # previously A97
+        df['staff_numbers'].loc[179] = '30'  # previously 30e
+        df['staff_numbers'].loc[248] = '80'  # previously 80R
+        df['staff_numbers'].loc[375] = '39'  # previously 3n9
+
+        # parses the staff numbers column to integer
+        df['staff_numbers'] = pd.to_numeric(df['staff_numbers'], errors='raise')
+        
+        # parses the opening date column to datetime
+        df['opening_date'] = pd.to_datetime(df['opening_date'], format='mixed', errors='coerce')
+        
+        # removes additional 'ee' characters in some continent column entries
+        df['continent'].replace(to_replace='eeEurope', value='Europe', inplace=True)
+        df['continent'].replace(to_replace='eeAmerica', value='America', inplace=True)
+        
+        # parses the store type, country code and continent columns to category
+        df[['store_type', 'country_code', 'continent']] = df[['store_type', 'country_code', 'continent']].astype('category', errors='raise')
         
         return df
