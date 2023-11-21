@@ -3,6 +3,8 @@ import numpy as np
 import tabula
 import requests
 import os.path
+import boto3
+import re
 from sqlalchemy import text
 from database_utils import DatabaseConnector
 from data_cleaning import DataCleaning
@@ -104,8 +106,16 @@ class DataExtractor:
                 df = pd.DataFrame([data])
                 df_list.append(df)
             df_store_data = pd.concat(df_list, ignore_index=True)
-            df_stores.to_csv('df_stores.csv', index=False)
+            df_store_data.to_csv('df_stores.csv', index=False)
         return df_store_data
+    
+    def extract_from_s3(self, address: str) -> pd.DataFrame:
+        address_split = re.split('://|/', address)
+        s3 = boto3.client('s3')
+        bucket = address_split[1]
+        key = address_split[2]
+        filename = address_split[2]
+        s3.download_file(Bucket=bucket, Key=key, Filename=filename)
 
 new_database_conn = DatabaseConnector()
 new_data_extractor = DataExtractor()
@@ -118,10 +128,13 @@ data_cleaning = DataCleaning()
 # df_card_details_from_pdf = new_data_extractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
 # df_card_details_clean = data_cleaning.clean_card_data(df_card_details_from_pdf)
 # new_database_conn.upload_to_db(df_card_details_clean, 'dim_card_details')
-st_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores'
-header_dict ={"x-api-key":"yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
-st_data_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/'
+# st_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores'
+# header_dict ={"x-api-key":"yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
+# st_data_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/'
 
-no_of_stores = new_data_extractor.list_number_of_stores(st_endpoint, header_dict)
-df_stores = new_data_extractor.retrieve_stores_data(st_data_endpoint, no_of_stores, header_dict)
-df_stores_clean = data_cleaning.clean_store_data(df_stores)
+# no_of_stores = new_data_extractor.list_number_of_stores(st_endpoint, header_dict)
+# df_stores = new_data_extractor.retrieve_stores_data(st_data_endpoint, no_of_stores, header_dict)
+# df_stores_clean = data_cleaning.clean_store_data(df_stores)
+# new_database_conn.upload_to_db(df_stores_clean, 'dim_store_details')
+
+new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
