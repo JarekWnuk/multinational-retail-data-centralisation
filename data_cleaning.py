@@ -129,3 +129,26 @@ class DataCleaning:
         df[['store_type', 'country_code', 'continent']] = df[['store_type', 'country_code', 'continent']].astype('category', errors='raise')
         
         return df
+    
+    def convert_product_weights(self, df: pd.DataFrame) -> pd.DataFrame:
+        df_masked_x = df[df['weight'].str.contains('x')]
+        df_masked_x['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
+        df_masked_x['weight'].replace(to_replace='x', value='*', regex=True, inplace=True)
+        df_masked_x['weight'] = df_masked_x['weight'].apply(lambda x : pd.eval(x)/1000)
+        df['weight'].replace(to_replace='kg', value='', regex=True, inplace=True)
+        df['weight'].replace(to_replace='ml', value='g', regex=True, inplace=True)
+
+        df_masked_x.set_index('index', inplace=True)
+        df.set_index('index', inplace=True)
+        df['weight'].update(df_masked_x['weight'])
+
+        df_masked_g = df[df['weight'].str.contains('g', na=False)]
+        df_masked_g['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
+
+        df_masked_g['weight'] = df_masked_g['weight'].apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
+        df['weight'].update(df_masked_g['weight'])
+        df = df.drop([751, 1133, 1400], axis=0)
+        df['weight'].replace(to_replace='77 .', value=0.077, regex=True, inplace=True)
+        df['weight'].replace(to_replace='16oz', value=0.454, regex=True, inplace=True)
+
+        df['weight'] = df['weight'].astype(float)       

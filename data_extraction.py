@@ -110,13 +110,28 @@ class DataExtractor:
         return df_store_data
     
     def extract_from_s3(self, address: str) -> pd.DataFrame:
+        """
+        Extracts a csv file from AWS s3 bucket. Takes in the address and splits it to: bucket, key and filename.
+        Saves the file locally and converts to pandas dataframe.
+
+        Args:
+            address (str): address of the resuorce on s3
+
+        Returns:
+            pd.DataFrame: pandas dataframe created from the downloaded file
+        """
         address_split = re.split('://|/', address)
         s3 = boto3.client('s3')
         bucket = address_split[1]
         key = address_split[2]
         filename = address_split[2]
         s3.download_file(Bucket=bucket, Key=key, Filename=filename)
-
+        with open('products.csv', 'r') as f:
+            df_products = pd.read_csv('products.csv')
+            df_products.rename(columns={'Unnamed: 0':'index'}, inplace=True)
+            f.close()
+        return df_products
+    
 new_database_conn = DatabaseConnector()
 new_data_extractor = DataExtractor()
 data_cleaning = DataCleaning()
@@ -137,4 +152,29 @@ data_cleaning = DataCleaning()
 # df_stores_clean = data_cleaning.clean_store_data(df_stores)
 # new_database_conn.upload_to_db(df_stores_clean, 'dim_store_details')
 
-new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
+df_products_to_clean = new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
+df_products_to_clean = df_products_to_clean.dropna()
+
+df_masked_x = df_products_to_clean[df_products_to_clean['weight'].str.contains('x')]
+df_masked_x['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
+df_masked_x['weight'].replace(to_replace='x', value='*', regex=True, inplace=True)
+df_masked_x['weight'] = df_masked_x['weight'].apply(lambda x : pd.eval(x)/1000)
+df_products_to_clean['weight'].replace(to_replace='kg', value='', regex=True, inplace=True)
+df_products_to_clean['weight'].replace(to_replace='ml', value='g', regex=True, inplace=True)
+
+df_masked_x.set_index('index', inplace=True)
+df_products_to_clean.set_index('index', inplace=True)
+df_products_to_clean['weight'].update(df_masked_x['weight'])
+
+df_masked_g = df_products_to_clean[df_products_to_clean['weight'].str.contains('g', na=False)]
+df_masked_g['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
+
+df_masked_g['weight'] = df_masked_g['weight'].apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
+df_products_to_clean['weight'].update(df_masked_g['weight'])
+df_products_to_clean = df_products_to_clean.drop([751, 1133, 1400], axis=0)
+df_products_to_clean['weight'].replace(to_replace='77 .', value=0.077, regex=True, inplace=True)
+df_products_to_clean['weight'].replace(to_replace='16oz', value=0.454, regex=True, inplace=True)
+
+df_products_to_clean['weight'] = df_products_to_clean['weight'].astype(float)
+
+print(df_products_to_clean['weight'].dtype)
