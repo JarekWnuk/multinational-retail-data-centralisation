@@ -131,24 +131,41 @@ class DataCleaning:
         return df
     
     def convert_product_weights(self, df: pd.DataFrame) -> pd.DataFrame:
-        df_masked_x = df[df['weight'].str.contains('x')]
-        df_masked_x['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
-        df_masked_x['weight'].replace(to_replace='x', value='*', regex=True, inplace=True)
-        df_masked_x['weight'] = df_masked_x['weight'].apply(lambda x : pd.eval(x)/1000)
+        """
+        Takes in a dataframe containing product data and cleans all the entries in the "weight" column.
+        Units are unified to kilograms. Fields containing multiplications are first calculated and the converted to kg.
+        Erronerous entries are removed.
+
+        Args:
+            df (pd.DataFrame): pandas dataframe with products data to clean
+
+        Returns:
+            pd.DataFrame: pandas dataframe with clean products data
+        """
+        # filters the weight column for any entries containing multiplications or "x" and replaces with "*" which is accepted by pd.eval()
+        # removes "g" from all filtered entries
+
+        df.loc[df['weight'].str.contains('x'), 'weight'] = df.loc[df['weight'].str.contains('x'), 'weight'].replace(to_replace='g', value='', regex=True)
+        df.loc[df['weight'].str.contains('x'), 'weight'] = df.loc[df['weight'].str.contains('x'), 'weight'].replace(to_replace='x', value='*', regex=True)
+        
+        # Uses pd.eval() on the cleaned entries to calculate the weights and converts to kilograms.
+        df.loc[df['weight'].str.contains('\*'), 'weight'] = df.loc[df['weight'].str.contains('\*'), 'weight'].apply(lambda x : pd.eval(x)/1000)
+        
+        # removes the "kg" from some rows
         df['weight'].replace(to_replace='kg', value='', regex=True, inplace=True)
+        
+        # replaces "ml" with "g" in some rows
         df['weight'].replace(to_replace='ml', value='g', regex=True, inplace=True)
 
-        df_masked_x.set_index('index', inplace=True)
-        df.set_index('index', inplace=True)
-        df['weight'].update(df_masked_x['weight'])
+        # filters all rows containing "g", removes it and converts to kilograms
+        df.loc[df['weight'].str.contains('g', na=False), 'weight'] = df.loc[df['weight'].str.contains('g', na=False), 'weight'].replace(to_replace='g', value='', regex=True).apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
 
-        df_masked_g = df[df['weight'].str.contains('g', na=False)]
-        df_masked_g['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
-
-        df_masked_g['weight'] = df_masked_g['weight'].apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
-        df['weight'].update(df_masked_g['weight'])
+        # removes rows with incorrect data and corrects ones where data can be implied
         df = df.drop([751, 1133, 1400], axis=0)
         df['weight'].replace(to_replace='77 .', value=0.077, regex=True, inplace=True)
         df['weight'].replace(to_replace='16oz', value=0.454, regex=True, inplace=True)
 
-        df['weight'] = df['weight'].astype(float)       
+        # parses the entire weight column to float
+        df['weight'] = df['weight'].astype(float)
+        
+        return df 

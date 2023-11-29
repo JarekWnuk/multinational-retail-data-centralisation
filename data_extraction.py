@@ -154,27 +154,6 @@ data_cleaning = DataCleaning()
 
 df_products_to_clean = new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
 df_products_to_clean = df_products_to_clean.dropna()
+df_clean_products = data_cleaning.convert_product_weights(df_products_to_clean)
 
-df_masked_x = df_products_to_clean[df_products_to_clean['weight'].str.contains('x')]
-df_masked_x['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
-df_masked_x['weight'].replace(to_replace='x', value='*', regex=True, inplace=True)
-df_masked_x['weight'] = df_masked_x['weight'].apply(lambda x : pd.eval(x)/1000)
-df_products_to_clean['weight'].replace(to_replace='kg', value='', regex=True, inplace=True)
-df_products_to_clean['weight'].replace(to_replace='ml', value='g', regex=True, inplace=True)
-
-df_masked_x.set_index('index', inplace=True)
-df_products_to_clean.set_index('index', inplace=True)
-df_products_to_clean['weight'].update(df_masked_x['weight'])
-
-df_masked_g = df_products_to_clean[df_products_to_clean['weight'].str.contains('g', na=False)]
-df_masked_g['weight'].replace(to_replace='g', value='', regex=True, inplace=True)
-
-df_masked_g['weight'] = df_masked_g['weight'].apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
-df_products_to_clean['weight'].update(df_masked_g['weight'])
-df_products_to_clean = df_products_to_clean.drop([751, 1133, 1400], axis=0)
-df_products_to_clean['weight'].replace(to_replace='77 .', value=0.077, regex=True, inplace=True)
-df_products_to_clean['weight'].replace(to_replace='16oz', value=0.454, regex=True, inplace=True)
-
-df_products_to_clean['weight'] = df_products_to_clean['weight'].astype(float)
-
-print(df_products_to_clean['weight'].dtype)
+print(df_clean_products.head()) 
