@@ -127,8 +127,7 @@ class DataExtractor:
         filename = address_split[2]
         s3.download_file(Bucket=bucket, Key=key, Filename=filename)
         with open('products.csv', 'r') as f:
-            df_products = pd.read_csv('products.csv')
-            df_products.rename(columns={'Unnamed: 0':'index'}, inplace=True)
+            df_products = pd.read_csv('products.csv', index_col=0)
             f.close()
         return df_products
     
@@ -153,8 +152,7 @@ data_cleaning = DataCleaning()
 # new_database_conn.upload_to_db(df_stores_clean, 'dim_store_details')
 
 df_products_to_clean = new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
-df_products_to_clean = df_products_to_clean.dropna()
 df_clean_product_weights = data_cleaning.convert_product_weights(df_products_to_clean)
 df_products_clean = data_cleaning.clean_products_data(df_clean_product_weights)
+new_database_conn.upload_to_db(df_products_clean, 'dim_products')
 
-print(df_products_clean.head)

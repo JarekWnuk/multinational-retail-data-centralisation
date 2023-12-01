@@ -142,6 +142,9 @@ class DataCleaning:
         Returns:
             pd.DataFrame: pandas dataframe with clean weight column 
         """
+        # removes all null values from the dataframe
+        df.dropna(inplace=True)
+        
         # filters the weight column for any entries containing multiplications or "x" and replaces with "*" which is accepted by pd.eval()
         # removes "g" from all filtered entries
 
@@ -180,8 +183,7 @@ class DataCleaning:
 
         Returns:
             pd.DataFrame: pandas dataframe with clean products data
-        """
-        
+        """     
         # removes "£" from the product_price column and parses all entries to float
         df['product_price'].replace(to_replace='£', value='', regex=True, inplace=True)
         df['product_price'] = df['product_price'].astype(float)
