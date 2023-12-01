@@ -140,7 +140,7 @@ class DataCleaning:
             df (pd.DataFrame): pandas dataframe with products data to clean
 
         Returns:
-            pd.DataFrame: pandas dataframe with clean products data
+            pd.DataFrame: pandas dataframe with clean weight column 
         """
         # filters the weight column for any entries containing multiplications or "x" and replaces with "*" which is accepted by pd.eval()
         # removes "g" from all filtered entries
@@ -165,7 +165,34 @@ class DataCleaning:
         df['weight'].replace(to_replace='77 .', value=0.077, regex=True, inplace=True)
         df['weight'].replace(to_replace='16oz', value=0.454, regex=True, inplace=True)
 
-        # parses the entire weight column to float
+        # parses the entries in the weight column to float
         df['weight'] = df['weight'].astype(float)
         
         return df 
+    
+    def clean_products_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        
+        """
+        Takes in a pandas dataframe, cleans the data and returns.
+        
+        Args:
+            df (pd.DataFrame): pandas dataframe with products data to clean
+
+        Returns:
+            pd.DataFrame: pandas dataframe with clean products data
+        """
+        
+        # removes "£" from the product_price column and parses all entries to float
+        df['product_price'].replace(to_replace='£', value='', regex=True, inplace=True)
+        df['product_price'] = df['product_price'].astype(float)
+        
+        # parses the category column to category
+        df['category'] = df['category'].astype('category')
+        
+        # converts entries in date_added column to datetime
+        df['date_added'] = pd.to_datetime(df['date_added'],format='mixed', errors='raise')
+        
+        #  parses the "removed" column to category
+        df['removed'] = df['removed'].astype('category')
+        
+        return df

@@ -154,6 +154,7 @@ data_cleaning = DataCleaning()
 
 df_products_to_clean = new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
 df_products_to_clean = df_products_to_clean.dropna()
-df_clean_products = data_cleaning.convert_product_weights(df_products_to_clean)
+df_clean_product_weights = data_cleaning.convert_product_weights(df_products_to_clean)
+df_products_clean = data_cleaning.clean_products_data(df_clean_product_weights)
 
-print(df_clean_products.head()) 
+print(df_products_clean.head)
