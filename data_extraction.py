@@ -169,5 +169,6 @@ data_cleaning = DataCleaning()
 
 df_date_times_to_clean = pd.read_json('https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json')
 df_date_times_clean = data_cleaning.clean_date_times(df_date_times_to_clean)
+new_database_conn.upload_to_db(df_date_times_clean, 'dim_date_times')
 
 print(df_date_times_clean.head())
