@@ -111,7 +111,7 @@ class DataExtractor:
     
     def extract_from_s3(self, address: str) -> pd.DataFrame:
         """
-        Extracts a csv file from AWS s3 bucket. Takes in the address and splits it to: bucket, key and filename.
+        Extracts a csv or json file from AWS s3 bucket. Takes in the address and splits it to: bucket, key and filename.
         Saves the file locally and converts to pandas dataframe.
 
         Args:
@@ -125,10 +125,15 @@ class DataExtractor:
         bucket = address_split[1]
         key = address_split[2]
         filename = address_split[2]
+        print(bucket, key, filename)
         s3.download_file(Bucket=bucket, Key=key, Filename=filename)
-        with open('products.csv', 'r') as f:
-            df_products = pd.read_csv('products.csv', index_col=0)
-            f.close()
+        with open(filename, 'r') as f:
+            if ".csv" in filename:
+                df_products = pd.read_csv(filename, index_col=0)
+                f.close()
+            else:
+                df_products = pd.read_json(filename)
+                f.close()
         return df_products
     
 new_database_conn = DatabaseConnector()
@@ -151,8 +156,18 @@ data_cleaning = DataCleaning()
 # df_stores_clean = data_cleaning.clean_store_data(df_stores)
 # new_database_conn.upload_to_db(df_stores_clean, 'dim_store_details')
 
-df_products_to_clean = new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
-df_clean_product_weights = data_cleaning.convert_product_weights(df_products_to_clean)
-df_products_clean = data_cleaning.clean_products_data(df_clean_product_weights)
-new_database_conn.upload_to_db(df_products_clean, 'dim_products')
+# df_products_to_clean = new_data_extractor.extract_from_s3('s3://data-handling-public/products.csv')
+# df_clean_product_weights = data_cleaning.convert_product_weights(df_products_to_clean)
+# df_products_clean = data_cleaning.clean_products_data(df_clean_product_weights)
+# new_database_conn.upload_to_db(df_products_clean, 'dim_products')
 
+#df_orders_to_clean = new_data_extractor.read_rds_table(new_database_conn, 'orders_table')
+#df_orders_to_clean.to_csv('table_data.csv', index=False)
+# with open('table_data.csv', 'r') as f:
+#     df_orders_to_clean = pd.read_csv(f, index_col=0)
+#     f.close
+
+df_date_times_to_clean = pd.read_json('https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json')
+df_date_times_clean = data_cleaning.clean_date_times(df_date_times_to_clean)
+
+print(df_date_times_clean.head())

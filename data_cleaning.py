@@ -198,3 +198,46 @@ class DataCleaning:
         df['removed'] = df['removed'].astype('category')
         
         return df
+    
+    def clean_orders_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Takes is a pandas dataframe containing orders data, cleans it and returns.
+
+        Args:
+            df (pd.DataFrame): pandas dataframe with orders data to clean
+
+        Returns:
+            pd.DataFrame: pandas dataframe with clean orders data 
+        """
+        #removes the first_name, last_name and 1 columns
+        df.drop(columns=['first_name', 'last_name', '1'], inplace=True)
+        
+        return df
+    
+    def clean_date_times(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Takes is a pandas dataframe containing date and time data, cleans it and returns.
+
+        Args:
+            df (pd.DataFrame): pandas dataframe with date and time data to clean
+
+        Returns:
+            df (pd.DataFrame): pandas dataframe with clean date and time data 
+        """
+        # removes all incorrect values from the 'timestamp' column, specifically all entries that do not contain a colon
+        df.drop(df[~df['timestamp'].str.contains(':')].index, inplace=True)
+
+        # adds a column with datetime objects, created from columns: 'day', 'month', 'year' and 'timestap'
+        df['date_time'] = df['year'] + '/' + df['month'] + '/' + df['day'] + ' ' + df['timestamp']
+        df['date_time'] = pd.to_datetime(df['date_time'], format='ISO8601', errors='raise')
+
+        # removes redundant columns
+        df.drop(columns=['timestamp', 'month', 'year', 'day'], inplace=True)
+
+        # converts the 'time_period' column to category
+        df['time_period'] = df['time_period'].astype('category')
+        
+        # rearrange columns
+        df = df[['date_time','time_period', 'date_uuid']]
+        
+        return df

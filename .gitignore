@@ -1,4 +1,5 @@
 db_creds.yaml
 db_creds_local.yaml
 df_stores.csv
+table_data.csv
 products.csv
