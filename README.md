@@ -38,14 +38,14 @@ Some entries contained multiplications of smaller weights, in the format of: wei
 Additionally, there were incorrect entries and null values as in the case of other data tables.
 The solution I have chosen to unify the weight data was to filter the data to all entries that contain "x", which was only present in the multiplications.
 The unit of weight (in this case "g") has been removed from all filtered entries and the "x" replaced with and asterisk. See code below:
-'''
+```
 df.loc[df['weight'].str.contains('x'), 'weight'] = df.loc[df['weight'].str.contains('x'), 'weight'].replace(to_replace='g', value='', regex=True)
 df.loc[df['weight'].str.contains('x'), 'weight'] = df.loc[df['weight'].str.contains('x'), 'weight'].replace(to_replace='x', value='*', regex=True)
-'''
+```
 This has enabled me to use the pandas.eval() and a lambda function to calculate the weights and convert to kilograms, as required. See code below:
-'''
+```
 df.loc[df['weight'].str.contains('\*'), 'weight'] = df.loc[df['weight'].str.contains('\*'), 'weight'].apply(lambda x : pd.eval(x)/1000)
-'''
+```
 In the above line, pd.eval(x) takes in "x" as a string and calculates the contents. This means that entries containing: weight * quantity get calculated, correcting the entry.
 Similar logic has been applied to less complex entries that just required a change of unit.
 
