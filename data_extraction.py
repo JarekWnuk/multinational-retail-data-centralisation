@@ -38,14 +38,17 @@ class DataExtractor:
         Args:
             db_connector_instance (DatabaseConnector): an instance of the DatabaseConnector class
             table_name (str): the name of the table from which to extract data
+        
+        Returns:
+            df (pd.Dataframe): a dataframe containing all the data from the specified table
         """
         if table_name in db_connector_instance.list_db_tables():
             query = f"SELECT * FROM {table_name}"
             query_result = self.query_db(db_connector_instance, query)
             df = pd.DataFrame(query_result)
+            return df
         else:
             print("The table specified does not exist.")
-        return df
     
     def retrieve_pdf_data(self, dir:str) -> pd.DataFrame:
         """
