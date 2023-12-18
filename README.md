@@ -52,7 +52,7 @@ Similar logic has been applied to less complex entries that just required a chan
 A couple of observations for every dataset processed:
     - string entries of 'NULL'
     - incorrect entries of an alphanumerical format with 10 characters, for example: XYZ123XU8E
-    - dates in mixed formates
+    - dates in mixed formats
 
 - data_extraction.py
 This is the main script, containing the class DataExtractor.
