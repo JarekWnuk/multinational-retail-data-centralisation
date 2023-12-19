@@ -68,5 +68,5 @@ class DatabaseConnector:
             table_name (str): the name of the new table to be created
         """
         engine = self.init_db_engine('db_creds_local.yaml')
-        df.to_sql(table_name, engine, if_exists='replace')
+        df.to_sql(table_name, engine, if_exists='replace', index=False)
         print(f'Table {table_name} has been created.')

@@ -13,7 +13,6 @@ class DataCleaning:
 
         Args:
             df (pd.DataFrame): pandas dataframe with user data
-        
         Returns:
             df (pd.DataFrame): pandas dataframe with clean user data
         """
@@ -26,7 +25,7 @@ class DataCleaning:
         # converts dates of birth to datetime objects
         df['date_of_birth'] = pd.to_datetime(df['date_of_birth'], format='mixed', errors='coerce').dt.date
 
-        # converts email addresses to string type raising any errors
+        # converts email addresses to string 
         df['email_address'] = df['email_address'].astype('string', errors='raise')
 
         # removes the extra '@' character in some email addresses
@@ -63,7 +62,6 @@ class DataCleaning:
         
         Args:
             df (pd.DataFrame): pandas dataframe with card details data
-        
         Returns:
             df (pd.DataFrame): pandas dataframe with clean card details data
         """
@@ -94,7 +92,6 @@ class DataCleaning:
 
         Args:
             df (pd.DataFrame): pandas dataframe with store details data to clean
-        
         Returns:
             df (pd.DataFrame): pandas dataframe with clean store details data
         """
@@ -133,11 +130,10 @@ class DataCleaning:
         """
         Takes in a dataframe containing product data and cleans all the entries in the "weight" column.
         Units are unified to kilograms. Fields containing multiplications are first calculated and the converted to kg.
-        Erronerous entries are removed.
+        Erroneous entries are removed.
 
         Args:
             df (pd.DataFrame): pandas dataframe with products data to clean
-
         Returns:
             pd.DataFrame: pandas dataframe with clean weight column 
         """
@@ -179,7 +175,6 @@ class DataCleaning:
         
         Args:
             df (pd.DataFrame): pandas dataframe with products data to clean
-
         Returns:
             pd.DataFrame: pandas dataframe with clean products data
         """     
@@ -204,22 +199,20 @@ class DataCleaning:
 
         Args:
             df (pd.DataFrame): pandas dataframe with orders data to clean
-
         Returns:
             pd.DataFrame: pandas dataframe with clean orders data 
         """
         #removes redundant columns
-        df.drop(columns=['first_name', 'last_name', '1'], inplace=True)
+        df.drop(columns=['level_0', 'first_name', 'last_name', '1'], inplace=True)
         
         return df
     
     def clean_date_times(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Takes is a pandas dataframe containing date and time data, cleans it and returns.
-
+        
         Args:
             df (pd.DataFrame): pandas dataframe with date and time data to clean
-
         Returns:
             df (pd.DataFrame): pandas dataframe with clean date and time data 
         """
