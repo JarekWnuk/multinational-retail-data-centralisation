@@ -17,7 +17,7 @@ class DataCleaning:
             df (pd.DataFrame): pandas dataframe with clean user data
         """
         # replaces all string entries equal to 'NULL' with nan
-        df.replace(to_replace='NULL', value=np.nan, inplace=True) 
+        df.replace(to_replace='NULL', value=np.nan, inplace=True)
 
         # replaces all incorrect entries containing 10 alphanumeric uppercase characters with nan
         df.replace(to_replace='^[A-Z0-9]{10}',regex=True, value=np.nan, inplace=True) 
@@ -50,8 +50,8 @@ class DataCleaning:
         # parses country_code column as category
         df['country_code'] = df['country_code'].astype('category', errors='raise') 
 
-        # removes all null values from the database
-        df = df.dropna()
+        # removes all null values from 'user_uuid' column, the entire rows were identified as null entries
+        df.dropna(subset= ['user_uuid'], how='all', inplace=True)
 
         return df
     
@@ -71,6 +71,15 @@ class DataCleaning:
         # replaces all non numeric entries in the "card_number" column with nan
         df['card_number'].replace(to_replace='^[a-zA-Z]',regex=True, value=np.nan, inplace=True)
 
+        # removes all null values from the database
+        df.dropna(inplace=True)
+
+        # converts "card_number" column to string
+        df['card_number'] = df['card_number'].astype('string', errors='raise')
+
+        # removes the "?" in all "card_number" entries
+        df['card_number'] = df['card_number'].str.replace('?','')
+        
         # converts the "expiry_date" column to datetime infering last day for each month
         df['expiry_date'] = pd.to_datetime(df['expiry_date'], format='%m/%y', errors='coerce') + MonthEnd(1)
 
@@ -79,9 +88,6 @@ class DataCleaning:
 
         # converts the "card_provider" column to category
         df['card_provider'].astype('category')
-
-        # removes all null values from the database
-        df = df.dropna()
         
         return df
     

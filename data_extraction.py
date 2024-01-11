@@ -140,7 +140,7 @@ if __name__ == "__main__":
     # df_user_data_clean = data_cleaning.clean_user_data(df_user_data)
     # new_database_conn.upload_to_db(df_user_data_clean, 'dim_user_details')
 
-    # df_card_details_from_pdf = new_data_extractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
+    # df_card_details_from_pdf = new_data_extractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')    
     # df_card_details_clean = data_cleaning.clean_card_data(df_card_details_from_pdf)
     # new_database_conn.upload_to_db(df_card_details_clean, 'dim_card_details')
     
@@ -156,13 +156,11 @@ if __name__ == "__main__":
     # df_clean_product_weights = data_cleaning.convert_product_weights(df_products_to_clean)
     # df_products_clean = data_cleaning.clean_products_data(df_clean_product_weights)
     # new_database_conn.upload_to_db(df_products_clean, 'dim_products')
-    
 
-    df_orders_to_clean = new_data_extractor.read_rds_table(new_database_conn, 'orders_table')
-    df_orders_clean = data_cleaning.clean_orders_data(df_orders_to_clean)
-    new_database_conn.upload_to_db(df_orders_clean, 'orders_table')
+    # df_orders_to_clean = new_data_extractor.read_rds_table(new_database_conn, 'orders_table')
+    # df_orders_clean = data_cleaning.clean_orders_data(df_orders_to_clean)
+    # new_database_conn.upload_to_db(df_orders_clean, 'orders_table')
 
     # df_date_times_to_clean = pd.read_json('https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json')
     # df_date_times_clean = data_cleaning.clean_date_times(df_date_times_to_clean)
     # new_database_conn.upload_to_db(df_date_times_clean, 'dim_date_times')
-
