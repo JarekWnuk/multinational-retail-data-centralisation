@@ -10,24 +10,26 @@ It is critical to get this part right, and so the amount of thought investment h
 have been missed initially. The inclusion of docstrings and comments (perhaps a few too many in a couple of methods) has made it easy to track the parts of code that still needed work.
 
 
-### Milestone 1
+### Milestone 1: Set up the environment
 The first milestone involved setting up the git hub repository and has been a straightforward task.
 
-### Milestone 2
-This was a major part of the project aiming at the implementation of the core classes and methods.
+### Milestone 2: Extract and clean the data from the data sources
+This was a major part of the project aiming at the implementation of core classes and methods.
 
 To outline the main functionality of the program:
-1. Download data from source.
-2. Consolidate and clean data.
-3. Upload to local database.
+- Download data from source.
+- Consolidate and clean data.
+- Upload to local database.
 
 The code has been segregated into three python scripts:
-- database_utils.py
+**database_utils.py**
+
 Contains the class DatabaseConnector with all methods related to interacting with databases.
 These include: reading credentials, creating an engine (use of sqlalchemy), listing all tables in a database and uploading data.
 Note that files containing database credentials have been included in the .gitignore file for security reasons.
 
-- data_cleaning.py
+**data_cleaning.py**
+
 Contains the class DataCleaning witl all methods that clean the extracted data.
 Each task in this milestone required to process a different set of data and so each has its own method in the class.
 Data tables contained information about: users, credit cards, stores, products, times of purchase.
@@ -49,16 +51,42 @@ df.loc[df['weight'].str.contains('\*'), 'weight'] = df.loc[df['weight'].str.cont
 In the above line, pd.eval(x) takes in "x" as a string and calculates the contents. This means that entries containing: weight * quantity get calculated, correcting the entry.
 Similar logic has been applied to less complex entries that just required a change of unit.
 
-A couple of observations for every dataset processed:
-    - string entries of 'NULL'
-    - incorrect entries of an alphanumerical format with 10 characters, for example: XYZ123XU8E
-    - dates in mixed formats
+**data_extraction.py**
 
-- data_extraction.py
 This is the main script, containing the class DataExtractor.
 Methods included in the class focus on extracting data from various sources.
 Classes from the other two files, mentioned above, are imported and used together to achieve the final data outcome.
 
+A couple of observations for the datasets processed:
+- string entries of 'NULL'
+- incorrect entries of an alphanumerical format with 10 characters, for example: XYZ123XU8E
+- dates in mixed formats
+- mixed data types in columns
 
+### Milestone 3: Create the database schema
+The star-based schema considers one of the tables as the centre of all information. The main table contains foreign keys that reference the primary keys in the other tables prefixed with "dim" and referred to as dimension tables.
+Tables with clean data already exist in the local database following actions listed in Milestone 2.
+The next task involved converting data types for certain columns to SQL recognised types, for instance:
+- TEXT columns converted to UUID, FLOAT, VARCHAR, DATE or BOOL
+- BIGINT to SMALLINT
 
+The project assumed most columns were TEXT, however, during the data cleaning process I have converted the data types to ones that were found more suitable using Pandas, which made the task simpler going forward.
+For some columns that needed convertion to VARCHAR there was a requirement to implement a constraint on the maximum length of allowed entries.
 
+To show the maximum character length in a given column in SQL the following clause was used:
+
+    SELECT MAX(LENGTH( column_name ))
+        FROM table_name;
+
+To convert column to VARCHAR and add max length constraint:
+
+    ALTER TABLE table_name
+	    ALTER COLUMN column_name TYPE VARCHAR( max_number_of_chars );
+
+The PRIMARY and FOREIGN KEY constraints were added as follows:
+    	
+    ALTER TABLE table_name	
+        ADD PRIMARY KEY (column_name),
+        ADD FOREIGN KEY (column_name_in_current_table) REFERENCES column_name_in_ref_table (column_name_in_current_table);
+
+Note that when adding the FOREIGN KEY constraint the entries in the current column need to match entries in the referenced column.
