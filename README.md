@@ -1,5 +1,7 @@
 # Multinational retail data centralization
+
 ##  Description
+
 The main goal of the project, as the name suggests, was to centralize sales data from multiple locations into one database.
 It was meant to challenge the ability to use data handling, data cleaning and database management and show an understanding of 
 the subject in practice. Since the retail data was being hosted in multiple locations (AWS RDS & S3, API) and in multiple formats (csv, json, pdf), 
@@ -11,9 +13,11 @@ have been missed initially. The inclusion of docstrings and comments (perhaps a 
 
 
 ### Milestone 1: Set up the environment
+
 The first milestone involved setting up the git hub repository and has been a straightforward task.
 
 ### Milestone 2: Extract and clean the data from the data sources
+
 This was a major part of the project aiming at the implementation of core classes and methods.
 
 To outline the main functionality of the program:
@@ -64,6 +68,7 @@ A couple of observations for the datasets processed:
 - mixed data types in columns
 
 ### Milestone 3: Create the database schema
+
 The star-based schema considers one of the tables as the centre of all information. The main table contains foreign keys that reference the primary keys in the other tables prefixed with "dim" and referred to as dimension tables.
 Tables with clean data already exist in the local database following actions listed in Milestone 2.
 The next task involved converting data types for certain columns to SQL recognised types, for instance:
@@ -90,3 +95,35 @@ The PRIMARY and FOREIGN KEY constraints were added as follows:
         ADD FOREIGN KEY (column_name_in_current_table) REFERENCES column_name_in_ref_table (column_name_in_current_table);
 
 Note that when adding the FOREIGN KEY constraint the entries in the current column need to match entries in the referenced column.
+
+### How to use
+
+Please ensure all required python libraries are installed prior to use. An Amazon account and CLI setup is needed to access AWS resources programmatically.
+
+See the official Amazon docs for setup:
+
+[Setting up AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html)
+
+To collect the data from source please use the following methods of the DataExtractor class:
+
+- read_rds_table
+- retrieve_pdf_data
+- retrieve_stores_data
+- extract_from_s3
+
+To clean the extracted data use the following methods of the DataCleaning class:
+
+- clean_user_data
+- clean_card_data
+- clean_store_data
+- convert_product_weights and clean_products_data
+- clean_orders_data
+- clean_date_times
+
+Finally, from DatabaseConnector use:
+
+- upload_to_db
+
+to upload the cleaned data to your local database.
+
+For more information on the methods please refer to the DocStrings.
