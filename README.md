@@ -20,12 +20,7 @@ The first milestone involved setting up the git hub repository and has been a st
 
 This was a major part of the project aiming at the implementation of core classes and methods.
 
-To outline the main functionality of the program:
-- Download data from source.
-- Consolidate and clean data.
-- Upload to local database.
-
-The code has been segregated into three python scripts:
+The code has been segregated into four python scripts:
 **database_utils.py**
 
 Contains the class DatabaseConnector with all methods related to interacting with databases.
@@ -55,23 +50,31 @@ df.loc[df['weight'].str.contains('\*'), 'weight'] = df.loc[df['weight'].str.cont
 In the above line, pd.eval(x) takes in "x" as a string and calculates the contents. This means that entries containing: weight * quantity get calculated, correcting the entry.
 Similar logic has been applied to less complex entries that just required a change of unit.
 
-**data_extraction.py**
-
-This is the main script, containing the class DataExtractor.
-Methods included in the class focus on extracting data from various sources.
-Classes from the other two files, mentioned above, are imported and used together to achieve the final data outcome.
-
-A couple of observations for the datasets processed:
+Observations for the processed datasets:
 - string entries of 'NULL'
 - incorrect entries of an alphanumerical format with 10 characters, for example: XYZ123XU8E
 - dates in mixed formats
 - mixed data types in columns
 
+**data_extraction.py**
+
+Contains the class DataExtractor.
+Methods included in the class focus on extracting data from various sources.
+Makes use of the DataConnector class to execute database queries.
+
+**main.py**
+
+Main project file, which utilizes the DataCleaning, DatabaseConnector and DataExtractor classes.
+Data processing followed the below sequence:
+- Download data from source.
+- Consolidate and clean data.
+- Upload to local database.
+
 ### Milestone 3: Create the database schema
 
 The star-based schema considers one of the tables as the centre of all information. The main table contains foreign keys that reference the primary keys in the other tables prefixed with "dim" and referred to as dimension tables.
 Tables with clean data already exist in the local database following actions listed in Milestone 2.
-The next task involved converting data types for certain columns to SQL recognised types, for instance:
+The following task involved converting data types for certain columns to SQL recognised types, for instance:
 - TEXT columns converted to UUID, FLOAT, VARCHAR, DATE or BOOL
 - BIGINT to SMALLINT
 

@@ -1,0 +1,17 @@
+-- Task 8
+-- Creating primary keys in the dimension tables:
+
+ALTER TABLE dim_user_details
+		ADD PRIMARY KEY (user_uuid);
+
+ALTER TABLE dim_store_details
+	ADD PRIMARY KEY store_code;
+
+ALTER TABLE dim_products
+	ADD PRIMARY KEY product_code;
+
+ALTER TABLE dim_date_times
+	ADD PRIMARY KEY date_uuid;
+
+ALTER TABLE dim_card_details
+	ADD PRIMARY KEY (card_number);
