@@ -1,11 +1,9 @@
-import numpy as np, pandas as pd
 from pandas.tseries.offsets import MonthEnd
+import numpy as np
+import pandas as pd
 
 
 class DataCleaning:
-    def __init__(self) -> None:
-        pass
-
     def clean_user_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Takes in a pandas dataframe containg user data from the project database and cleans it.
@@ -16,41 +14,31 @@ class DataCleaning:
         Returns:
             df (pd.DataFrame): pandas dataframe with clean user data
         """
-        # replaces all string entries equal to 'NULL' with nan
         df.replace(to_replace='NULL', value=np.nan, inplace=True)
 
         # replaces all incorrect entries containing 10 alphanumeric uppercase characters with nan
         df.replace(to_replace='^[A-Z0-9]{10}',regex=True, value=np.nan, inplace=True) 
 
-        # converts dates of birth to datetime objects
         df['date_of_birth'] = pd.to_datetime(df['date_of_birth'], format='mixed', errors='coerce').dt.date
 
-        # converts email addresses to string 
         df['email_address'] = df['email_address'].astype('string', errors='raise')
 
-        # removes the extra '@' character in some email addresses
         df['email_address'] = df['email_address'].str.replace('@@','@')
 
-        # replaces all email address entries that do not contain the '@' character with nan
         df.loc[~df['email_address'].str.contains('@'), 'email_address'] = np.nan
 
-        # converts join dates to datetime objects
         df['join_date'] = pd.to_datetime(df['join_date'], format='mixed', errors='coerce').dt.date
 
-        # replaces 'GGB' with 'GB' in 6 country code entries
         df['country_code'] = df['country_code'].str.replace('GGB','GB')
 
-        # replaces '\n' with a whitespace in many address entries
         df['address'] = df['address'].str.replace('\n',' ')
 
-        # parses multiple columns as string
-        df[['first_name', 'last_name', 'company', 'address','country', 'phone_number', 'user_uuid']] = \
-            df[['first_name', 'last_name', 'company', 'address', 'country', 'phone_number', 'user_uuid']].astype('string', errors='raise')
+        column_list = ['first_name', 'last_name', 'company', 'address','country', 'phone_number', 'user_uuid'] 
+        df[column_list] = df[column_list].astype('string', errors='raise')
 
-        # parses country_code column as category
         df['country_code'] = df['country_code'].astype('category', errors='raise') 
 
-        # removes all null values from 'user_uuid' column, the entire rows were identified as null entries
+        # removes entire rows with missing data by indexing the 'user_uuid' column
         df.dropna(subset= ['user_uuid'], how='all', inplace=True)
 
         return df
@@ -65,28 +53,22 @@ class DataCleaning:
         Returns:
             df (pd.DataFrame): pandas dataframe with clean card details data
         """
-        # replaces all string entries equal to 'NULL' with nan
         df.replace(to_replace='NULL', value=np.nan, inplace=True)
 
         # replaces all non numeric entries in the "card_number" column with nan
         df['card_number'].replace(to_replace='^[a-zA-Z]',regex=True, value=np.nan, inplace=True)
 
-        # removes all null values from the database
         df.dropna(inplace=True)
 
-        # converts "card_number" column to string
         df['card_number'] = df['card_number'].astype('string', errors='raise')
 
-        # removes the "?" in all "card_number" entries
         df['card_number'] = df['card_number'].str.replace('?','')
         
         # converts the "expiry_date" column to datetime infering last day for each month
         df['expiry_date'] = pd.to_datetime(df['expiry_date'], format='%m/%y', errors='coerce') + MonthEnd(1)
 
-        # converts the "date_payment_confirmed" column to datetime
         pd.to_datetime(df['date_payment_confirmed'], errors='coerce')
 
-        # converts the "card_provider" column to category
         df['card_provider'].astype('category')
         
         return df
@@ -101,33 +83,25 @@ class DataCleaning:
         Returns:
             df (pd.DataFrame): pandas dataframe with clean store details data
         """
-        # replaces newline characters from the "address" column with whitespaces
         df['address'] = df['address'].str.replace('\n',' ')
         
         # removes the "lat" column since it contains minimal data
         df = df.drop('lat', axis=1)
         
-        # removes multiple rows which contained only incorrect data
-        df = df.drop([63, 172, 217, 231, 333, 381, 414, 447, 405, 437], axis=0)
+        # removes all rows with incorrect entries by filtering the 'country_code' column to length of 10, inluding NaNs
+        mask = df['country_code'].str.contains('^.{10}', regex=True, na=True)
+        df = df[~mask]
         
         # corrects some entries in the "staff numbers" column, contained a mix of numbers and characters
-        df['staff_numbers'].loc[31] = '78'   # previously J78
-        df['staff_numbers'].loc[341] = '97'  # previously A97
-        df['staff_numbers'].loc[179] = '30'  # previously 30e
-        df['staff_numbers'].loc[248] = '80'  # previously 80R
-        df['staff_numbers'].loc[375] = '39'  # previously 3n9
-
-        # converts the "staff numbers" column to integer
+        df['staff_numbers'] = df['staff_numbers'].str.replace(r'\D', '', regex=True)
         df['staff_numbers'] = pd.to_numeric(df['staff_numbers'], errors='raise')
         
-        # converts the "opening date" column to datetime
         df['opening_date'] = pd.to_datetime(df['opening_date'], format='mixed', errors='coerce')
         
         # removes additional 'ee' characters in some "continent" column entries
         df['continent'].replace(to_replace='eeEurope', value='Europe', inplace=True)
         df['continent'].replace(to_replace='eeAmerica', value='America', inplace=True)
         
-        # converts the "store type", "country code" and "continent" columns to category
         df[['store_type', 'country_code', 'continent']] = df[['store_type', 'country_code', 'continent']].astype('category', errors='raise')
         
         return df
@@ -155,27 +129,29 @@ class DataCleaning:
         # Uses pd.eval() on the cleaned entries to calculate the weights and converts to kilograms.
         df.loc[df['weight'].str.contains('\*'), 'weight'] = df.loc[df['weight'].str.contains('\*'), 'weight'].apply(lambda x : pd.eval(x)/1000)
         
-        # removes the "kg" from some rows
         df['weight'].replace(to_replace='kg', value='', regex=True, inplace=True)
         
-        # replaces "ml" with "g" in some rows
         df['weight'].replace(to_replace='ml', value='g', regex=True, inplace=True)
 
-        # filters all rows containing "g", removes it and converts to kilograms
-        df.loc[df['weight'].str.contains('g', na=False), 'weight'] = df.loc[df['weight'].str.contains('g', na=False), 'weight'].replace(to_replace='g', value='', regex=True).apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
+        # filters all rows containing the character 'g', removes it and converts entries to kilograms
+        mask_g = df['weight'].str.contains('g', na=False)
+        df.loc[mask_g, 'weight'] = df.loc[mask_g, 'weight'].replace(to_replace='g', value='', regex=True).apply(lambda x : pd.eval(x)/1000 if str(x).isdigit() else x)
 
-        # removes rows with incorrect data and corrects ones where data can be implied
-        df = df.drop([751, 1133, 1400], axis=0)
+        # removes rows with incorrect alphanumerical data of length 10
+        error_indexes = df[df['weight'].str.contains('^.{10}', regex=True, na=False)].index
+        df = df.drop(error_indexes, axis=0)
+
         df['weight'].replace(to_replace='77 .', value=0.077, regex=True, inplace=True)
-        df['weight'].replace(to_replace='16oz', value=0.454, regex=True, inplace=True)
 
-        # converts entries in the weight column to float
+        # converts entries containing ounces into kilograms
+        mask_oz = df['weight'].str.contains('oz', na=False)
+        df.loc[mask_oz, 'weight'] = df.loc[mask_oz, 'weight'].replace(to_replace='oz', value='', regex=True).apply(lambda x : pd.eval(x)*28.35/1000)
+
         df['weight'] = df['weight'].astype(float)
         
-        return df 
+        return df
     
     def clean_products_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        
         """
         Takes in a pandas dataframe, cleans the data and returns.
         
@@ -188,13 +164,10 @@ class DataCleaning:
         df['product_price'].replace(to_replace='£', value='', regex=True, inplace=True)
         df['product_price'] = df['product_price'].astype(float)
         
-        # converts the category column to category
         df['category'] = df['category'].astype('category')
         
-        # converts entries in date_added column to datetime
         df['date_added'] = pd.to_datetime(df['date_added'],format='mixed', errors='raise')
         
-        #  parses the "removed" column to category
         df['removed'] = df['removed'].astype('category')
         
         return df
@@ -232,7 +205,6 @@ class DataCleaning:
         # removes redundant columns
         df.drop(columns=['timestamp', 'month', 'year', 'day'], inplace=True)
 
-        # converts the 'time_period' column to category
         df['time_period'] = df['time_period'].astype('category')
         
         # rearrange columns

@@ -99,9 +99,14 @@ The PRIMARY and FOREIGN KEY constraints were added as follows:
 
 Note that when adding the FOREIGN KEY constraint the entries in the current column need to match entries in the referenced column.
 
-### How to use
+### Installation instructions
+Required python dependencies can be installed from the included "requirements.txt" file using PIP:
 
-Please ensure all required python libraries are installed prior to use. An Amazon account and CLI setup is needed to access AWS resources programmatically.
+    pip install -r requirements.txt
+    
+Please ensure that your current directory is in the folder containing the project files before executing the above command.
+
+An Amazon account and CLI setup is needed to access AWS resources programmatically.
 
 See the official Amazon docs for setup:
 

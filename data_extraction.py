@@ -1,11 +1,14 @@
-import boto3, os.path, requests, re, tabula, pandas as pd
-from sqlalchemy import text
 from database_utils import DatabaseConnector
+from sqlalchemy import text
+import boto3
+import os.path
+import re
+import requests
+import tabula
+import pandas as pd 
+
 
 class DataExtractor:
-    def __init__(self) -> None:
-        pass
-    
     def query_db(self,db_connector_instance: DatabaseConnector, query: str):
         """
         Uses an instance of the DatabaseConnector class to establish a connection to the database.
@@ -20,7 +23,6 @@ class DataExtractor:
         db_engine = db_connector_instance.init_db_engine()
         with db_engine.execution_options(isolation_level='AUTOCOMMIT').connect() as conn:
             result = conn.execute(text(query))
-        conn.close()
         return result
     
     def read_rds_table(self, db_connector_instance: DatabaseConnector, table_name:str) -> pd.DataFrame:
@@ -119,7 +121,7 @@ class DataExtractor:
         key = address_split[2]
         filename = address_split[2]
         s3.download_file(Bucket=bucket, Key=key, Filename=filename)
-        
+
         # Checks if the file is csv or json and converts to dataframe.
         with open(filename, 'r') as f:
             if ".csv" in filename:

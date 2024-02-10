@@ -1,5 +1,6 @@
 db_creds.yaml
 db_creds_local.yaml
+x_api_key.env
 df_stores.csv
 table_data.csv
 products.csv
