@@ -6,8 +6,8 @@ import os
 import pandas as pd
 
 
-local_database_conn = DatabaseConnector('db_creds_local.yaml')
-remote_database_conn = DatabaseConnector('db_creds.yaml')
+local_database_conn = DatabaseConnector('db_creds_local.yaml')  # pass your own database credentials to class instance
+remote_database_conn = DatabaseConnector('db_creds.yaml')       
 new_data_extractor = DataExtractor()
 data_cleaning = DataCleaning()
 
