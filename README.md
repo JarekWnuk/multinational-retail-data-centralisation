@@ -195,7 +195,7 @@ LIMIT
 
 OUTPUT:
 ```
-total_sales     year    month
+total_sales     	year    month
 
 27936.77	    1994	  3
 27356.14	    2019	  1
