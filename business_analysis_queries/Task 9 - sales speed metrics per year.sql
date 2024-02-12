@@ -20,7 +20,7 @@ FROM
 )
 SELECT
 	year,
-	CONCAT(' hours: ', CAST(EXTRACT( HOUR FROM AVG(time_between_sales)) AS TEXT),
+	CONCAT('hours: ', CAST(EXTRACT( HOUR FROM AVG(time_between_sales)) AS TEXT),
 		  ' minutes: ', CAST(EXTRACT( MINUTE FROM AVG(time_between_sales)) AS TEXT),
 		   ' seconds: ',CAST(EXTRACT( SECOND FROM AVG(time_between_sales)) AS TEXT)) AS actual_time_taken
 FROM 

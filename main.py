@@ -6,12 +6,6 @@ import os
 import pandas as pd
 
 
-local_database_conn = DatabaseConnector('db_creds_local.yaml')  # pass your own database credentials to class instance
-remote_database_conn = DatabaseConnector('db_creds.yaml')       
-new_data_extractor = DataExtractor()
-data_cleaning = DataCleaning()
-
-
 def process_user_data() -> None:
     """
     Retrieves, cleans and uploads data for users.
@@ -73,13 +67,18 @@ def process_date_times_data(date_times_endpoint: str) -> None:
         Args:
             date_times_endpoint (str): S3 endpoint for file containing date time data, works with json files
     """
-    # if the endpoint is not passed then project default is used
     df_date_times_to_clean = pd.read_json(date_times_endpoint)
     df_date_times_clean = data_cleaning.clean_date_times(df_date_times_to_clean)
     local_database_conn.upload_to_db(df_date_times_clean, 'dim_date_times')
 
 
 if __name__ == "__main__":
+
+    local_database_conn = DatabaseConnector('db_creds_local.yaml')  # file with credentials for local databse is passed to class instance
+    remote_database_conn = DatabaseConnector('db_creds.yaml')       # file with credentials for remote databse is passed to class instance
+    new_data_extractor = DataExtractor()
+    data_cleaning = DataCleaning()
+
     process_user_data()
 
     card_details_endpoint = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf'
