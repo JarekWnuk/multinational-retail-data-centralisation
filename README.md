@@ -248,7 +248,7 @@ store_type      total_sales     percentage
 "Web Portal"	1726547.05	    22.36
 "Super Store"	1224293.65	    15.85
 "Mall Kiosk"	698791.61	    9.05
-"Outlet"	    631804.81	    8.18
+"Outlet"		631804.81	    8.18
 ```
 
 **How quickly is the company making sales?**
