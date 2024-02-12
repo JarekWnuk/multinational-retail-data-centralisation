@@ -170,7 +170,7 @@ Please note that database credentials need to be passed to the DatabaseConnector
 
 Executing SQL queries on the finished database allows to answer relevant questions about the business:
 
-Which month in each year produced the highest sales?
+**Which month in each year produced the highest sales?**
 
 QUERY:
 ```
@@ -209,7 +209,7 @@ total_sales     year    month
 25614.54	    2000	  1
 ```
 
-What percentage of sales comes from each type of store?
+**What percentage of sales comes from each type of store?**
 
 QUERY:
 ```
@@ -251,7 +251,7 @@ store_type      total_sales     percentage
 "Outlet"	    631804.81	    8.18
 ```
 
-How quickly is the company making sales?
+**How quickly is the company making sales?**
 
 QUERY:
 ```
